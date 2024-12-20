@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const {z} = require('zod') // zod for Schema validation 
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -11,6 +12,22 @@ app.use(express.json())
 
 let errorThrown = false
 app.post("/signup",async function(req,res){
+    const requiredBody = z.object({
+        email : z.string().min().max(50).email(),
+        password : z.string().min(20).max(30),
+        name : z.string()
+    })
+
+    const parsedDataWithSuccess = requiredBody.safeParse(req.body)
+
+    if(!parsedDataWithSuccess.success){
+        res.json({
+            msg : "Incorrect Format",
+            error : parsedDataWithSuccess.error
+        })
+        return
+    }
+
     const {email , password , name} = req.body
     // Input Validation
     // if(typeof email != "string" || email.length <= 4 || !email.includes("@"))
