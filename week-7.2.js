@@ -13,8 +13,17 @@ app.use(express.json())
 let errorThrown = false
 app.post("/signup",async function(req,res){
     const requiredBody = z.object({
-        email : z.string().min().max(50).email(),
-        password : z.string().min(20).max(30),
+        email : z.string().min(15 , {message : "Email Must be 15 or more characters long"}).max(50).email({ message: "Invalid email address" }),
+        password : z.string().min(20).max(30)
+        .refine(val => /[a-z]/.test(val),{
+            message: "Password must contain at least one lowercase letter",
+          })
+          .refine(val => /[!@#$%^&*(),.?":{}|<>]/.test(val), {
+            message: "Password must contain at least one special character",
+          })
+          .refine(val => (val.match(/[A-Z]/g) || []).length >= 3 , {
+            message : "Password must contain atleast 3 uppercase characters"
+          }),
         name : z.string()
     })
 
